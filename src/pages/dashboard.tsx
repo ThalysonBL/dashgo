@@ -1,10 +1,9 @@
-import {Header} from '../components/Header'
-import { Sidebar } from '../components/Sidebar';
-import { Flex, SimpleGrid , Box, Text} from '@chakra-ui/react';
+import {Header} from '../components/Header/'
 import dynamic from 'next/dynamic';
-import Chart from 'react-apexcharts';
+import { Sidebar } from '../components/Sidebar';
+import { Flex, SimpleGrid , Box, Text, theme} from '@chakra-ui/react';
 
-const chart = dynamic(() => import('react-apexcharts'), {
+const Chart = dynamic(() => import('react-apexcharts'), {
   ssr: false, //O react-apexcharts não será carregado do lado do servidor, será carregado do lado do cliente/browser
 })
 
@@ -20,11 +19,50 @@ const options = {
 
   },
   grid: {
-    show: false,
+    show: false, //grades do background
   },
   dataLabels: {
-    
+    enabled: false, //remove as labels (traço das fontes) 
+  },
+  stroke: {
+    curve: 'smooth', //as curvas do gráfico será leve
+  },
+  tooltip: {
+    enabled: false, //remove as interações ao passar o mouse
+  },
+  xasxis: {
+    type: 'datetine',
+    axisBorder: { //borda inferior da tabela
+      color: theme.colors.gray[600]
+    },
+    axisTicket: {
+      color: theme.colors.gray[600] //cor dos pontinhos que fica na linha inferior horizontal
+
+    },
+    categories: //cada elemento do array é referente a const series
+      [
+      '2021-03-18T00:00:00.000Z', //deve ser passado data primeiro, segundo tempo/hora e o Z no final (time Zone)
+      '2021-03-19T00:00:00.000Z',
+      '2021-03-20T00:00:00.000Z',
+      '2021-03-21T00:00:00.000Z',
+      '2021-03-22T00:00:00.000Z',
+      '2021-03-23T00:00:00.000Z',
+      '2021-03-24T00:00:00.000Z',
+
+    ],
+  
+  },
+
+  fill: { //preenchimento de cor do gráfico
+    opacity: 0.3,
+    type: 'gradient',
+    shadde: 'dark',
+    opacityFrom: 0.7,
+    opacityTo: 0.3
+
+
   }
+
 
 };
 const series = [
@@ -36,7 +74,7 @@ export default function Dashboard() {
   return(
     <Flex direction="column" h="100vh">
         <Header />
-        <Flex w="100%" my="6" maxWidth={1480} mx="auto" px="6">
+        <Flex w="100%" my="6" maxWidth={1480} mx="auto" px="24px">
           <Sidebar />
 
           <SimpleGrid //usado para reponsivar
@@ -44,11 +82,14 @@ export default function Dashboard() {
             gap="4"
             minChildWidth="320px" //Todo filho terá no mínimo 320px de largura 
             align="flex-start"
+            pb="4"
           >
             <Box
               p="8"
               bg="gray.800"
               borderRadius={8}
+              pb="4"
+
             >
               <Text
                 fontSize="lg" mb="4"
@@ -68,6 +109,12 @@ export default function Dashboard() {
               <Text
                 fontSize="lg" mb="4"
               >Taxa de abertura</Text>
+              <Chart 
+              options={options} //recebe os valores da const options
+              series={series} //recebe os valores/dados da const series
+              type="area"//tipo de grafíco
+              height={160}
+            />
             </Box>
 
           </SimpleGrid>
