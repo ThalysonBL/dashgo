@@ -10,6 +10,8 @@ import {
 } from "@chakra-ui/react";
 
 import Link  from "next/link";
+import { useMutation } from 'react-query'; //lida com transferrencia de dados na rota diminuindo quantas quantidade de POST
+
 
 import * as yup from 'yup';//importei todos os métodos para a variavel yup
 import {yupResolver} from '@hookform/resolvers/yup'
@@ -18,6 +20,8 @@ import {useForm, SubmitHandler, formState} from 'react-hook-form';
 import { Header } from "../../components/Header/";
 import { Sidebar } from "../../components/Sidebar";
 import { Input } from './../../components/Form/Input';
+import { queryClient } from '../../services/queryClient';
+import { useRouter } from 'next/router'
 
 type CreateUserFormData = {
   name: string;
@@ -40,12 +44,29 @@ const createUserFormSchema = yup.object().shape({
 })
 
 export default function CreateUser() {
+  const router = useRouter();
+  const createUser = useMutation(async (user: createUserFormData) => {
+    const response = await api.post('users', {
+      user: {
+        ...user, //dados antigos ddos usuários
+        created_at:new Date(),
+      }
+    })
+    return response.data.user;
+  }, {
+    onSuccess: () => {//se der sucesso o cadatro vamos zerar o cache
+      queryClient.invalidteQueries('users')
+    }
+  });
+
+
   const { register,handleSubmit, formState, errors} = useForm({
     resolver: yupResolver(createUserFormSchema)
   })
 
-  const handleCreateUser: SubmitHandler<CreateUserFormData> = (values) => {
-
+  const handleCreateUser: SubmitHandler<CreateUserFormData> = async (values) => {
+ await createUser.mutateAsync(values);
+ router.push('/users')
   }
 
   return (
